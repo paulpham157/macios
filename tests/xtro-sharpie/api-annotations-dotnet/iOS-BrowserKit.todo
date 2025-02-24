@@ -1,0 +1,3 @@
+!missing-enum! BEEligibilityContext not bound
+!missing-selector! +BEAvailability::isEligibleForContext:completionHandler: not bound
+!missing-type! BEAvailability not bound

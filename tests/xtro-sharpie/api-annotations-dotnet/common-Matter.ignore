@@ -1239,7 +1239,6 @@
 !missing-selector! +MTREventPath::eventPathWithEndpointID:clusterID:eventID: not bound
 !missing-selector! +MTREventRequestPath::requestPathWithEndpointID:clusterID:eventID: not bound
 !missing-selector! +MTRServerCluster::newDescriptorCluster not bound
-!missing-selector! +MTRSetupPayload::generateRandomPIN not bound
 !missing-selector! +MTRSetupPayload::generateRandomSetupPasscode not bound
 !missing-selector! MTRAccessControlClusterAccessControlEntryChangedEvent::adminNodeID not bound
 !missing-selector! MTRAccessControlClusterAccessControlEntryChangedEvent::adminPasscodeID not bound

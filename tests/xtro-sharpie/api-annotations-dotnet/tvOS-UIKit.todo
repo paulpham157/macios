@@ -1,0 +1,3 @@
+!missing-selector! UITab::hasVisiblePlacement not bound
+!missing-selector! UITab::isEnabled not bound
+!missing-selector! UITab::setEnabled: not bound

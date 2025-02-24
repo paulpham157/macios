@@ -1,0 +1,3 @@
+!missing-enum! GKReleaseState not bound
+!missing-enum-value! GKError native value GKErrorDebugMode = 38 not bound
+!missing-selector! GKAchievementDescription::releaseState not bound
