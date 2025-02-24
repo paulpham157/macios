@@ -151,6 +151,8 @@ namespace Introspection {
 				// Looking at the stack trace in Xcode, it seems it hits the network and times out waiting for something?
 				// So just skip the testing, it's likely the constructor is bound correctly, but that it only works in some circumstances.
 				return true;
+			case "ASAccountAuthenticationModificationController":
+				return true; // started failing in Xcode 16.3 beta 1 for unknown reasons (it works in an Xcode project).
 			}
 
 			switch (type.Namespace) {
