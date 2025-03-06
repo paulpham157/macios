@@ -2026,6 +2026,7 @@ COMMON_FRAMEWORKS =         \
 	CoreVideo               \
 	CryptoTokenKit          \
 	Compression             \
+	DataDetection           \
 	DeviceCheck             \
 	Foundation              \
 	GameKit                 \
