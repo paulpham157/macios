@@ -176,6 +176,62 @@ static partial class BindingSyntaxFactory {
 	}
 
 	/// <summary>
+	/// Returns the method group needed to get a NSValue from a handle.
+	/// </summary>
+	/// <param name="returnType">The type info of the return type.</param>
+	/// <returns>The member access to the correct NSValue method.</returns>
+	internal static MemberAccessExpressionSyntax? NSValueFromHandle (TypeInfo returnType)
+	{
+#pragma warning disable format
+		var memberName = returnType switch {
+			// CoreAnimation
+			{ FullyQualifiedName: "CoreAnimation.CATransform3D" } => "ToCATransform3D",
+			
+			// CoreGraphics
+			{ FullyQualifiedName: "CoreGraphics.CGAffineTransform" } => "ToCGAffineTransform",
+			{ FullyQualifiedName: "CoreGraphics.CGPoint" } => "ToCGPoint",
+			{ FullyQualifiedName: "CoreGraphics.CGRect" } => "ToCGRect",
+			{ FullyQualifiedName: "CoreGraphics.CGSize" } => "ToCGSize",
+			{ FullyQualifiedName: "CoreGraphics.CGVector" } => "ToCGVector",
+			
+			// CoreMedia
+			{ FullyQualifiedName: "CoreMedia.CMTime" } => "ToCMTime",
+			{ FullyQualifiedName: "CoreMedia.CMTimeMapping" } => "ToCMTimeMapping",
+			{ FullyQualifiedName: "CoreMedia.CMTimeRange" } => "ToCMTimeRange",
+			{ FullyQualifiedName: "CoreMedia.CMVideoDimensions" } => "ToCMVideoDimensions",
+			
+			// CoreLocation
+			{ FullyQualifiedName: "CoreLocation.CLLocationCoordinate2D" } => "ToCLLocationCoordinate2D",
+			
+			// Foundation
+			{ FullyQualifiedName: "Foundation.NSRange" } => "ToNSRange",
+			
+			// MapKit
+			{ FullyQualifiedName: "MapKit.MKCoordinateSpan" } => "ToMKCoordinateSpan",
+			
+			// SceneKit
+			{ FullyQualifiedName: "SceneKit.SCNMatrix4" } => "ToSCNMatrix4",
+			{ FullyQualifiedName: "SceneKit.SCNVector3" } => "ToSCNVector3",
+			{ FullyQualifiedName: "SceneKit.SCNVector4" } => "ToSCNVector4",
+			
+			// UIKit
+			{ FullyQualifiedName: "UIKit.NSDirectionalEdgeInsets" } => "ToNSDirectionalEdgeInsets",
+			{ FullyQualifiedName: "UIKit.UIEdgeInsets" } => "ToUIEdgeInsets",
+			{ FullyQualifiedName: "UIKit.UIOffset" } => "ToUIOffset",
+			
+			_ => null,
+		};
+#pragma warning restore format
+		
+		if (memberName is null)
+			return null;
+		return MemberAccessExpression (
+			SyntaxKind.SimpleMemberAccessExpression,
+			IdentifierName ("NSValue"),
+			IdentifierName (memberName));
+	}
+
+	/// <summary>
 	/// Returns the method group needed to get a NSNumber from a handle.
 	/// </summary>
 	/// <param name="returnType">The type info of the return type.</param>
