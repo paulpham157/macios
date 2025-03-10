@@ -274,7 +274,6 @@ static partial class BindingSyntaxFactory {
 			IdentifierName (memberName));
 	}
 
-
 	/// <summary>
 	/// Generates a call to the NSArray.ArrayFromHandleFunc with the given arguments.
 	/// </summary>
