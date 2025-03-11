@@ -1773,7 +1773,6 @@ namespace Xamarin.Tests {
 			switch (platform) {
 			case ApplePlatform.iOS:
 			case ApplePlatform.TVOS:
-			case ApplePlatform.WatchOS:
 				sharedSupportDir = "SharedSupport";
 				break;
 			case ApplePlatform.MacOSX:
