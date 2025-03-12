@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Macios.Generator.Extensions;
+using TypeInfo = Microsoft.Macios.Generator.DataModel.TypeInfo;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Microsoft.Macios.Generator.Emitters;
@@ -53,9 +54,9 @@ static partial class BindingSyntaxFactory {
 	{
 		// (selector)
 		var args = ArgumentList (SingletonSeparatedList (
-					Argument (LiteralExpression (
-						SyntaxKind.StringLiteralExpression,
-						Literal (selector))))).NormalizeWhitespace ();
+			Argument (LiteralExpression (
+				SyntaxKind.StringLiteralExpression,
+				Literal (selector))))).NormalizeWhitespace ();
 
 		// Selector.GetHandle (selector)
 		return InvocationExpression (
@@ -120,16 +121,16 @@ static partial class BindingSyntaxFactory {
 		var argumentList = ArgumentList (SeparatedList<ArgumentSyntax> (args));
 		// generates: ObjCRuntime.Messaging.objc_msgSend (this.Handle, Selector.GetHandle (selector), args)
 		var invocation = InvocationExpression (
-			MemberAccessExpression (
-				SyntaxKind.SimpleMemberAccessExpression,
 				MemberAccessExpression (
 					SyntaxKind.SimpleMemberAccessExpression,
-					AliasQualifiedName (
-						IdentifierName (
-							Token (SyntaxKind.GlobalKeyword)),
-						IdentifierName ("ObjCRuntime")),
-					IdentifierName ("Messaging")),
-				IdentifierName (objcMsgSendMethod).WithTrailingTrivia (Space)))
+					MemberAccessExpression (
+						SyntaxKind.SimpleMemberAccessExpression,
+						AliasQualifiedName (
+							IdentifierName (
+								Token (SyntaxKind.GlobalKeyword)),
+							IdentifierName ("ObjCRuntime")),
+						IdentifierName ("Messaging")),
+					IdentifierName (objcMsgSendMethod).WithTrailingTrivia (Space)))
 			.WithArgumentList (argumentList);
 		return invocation;
 	}
@@ -147,10 +148,10 @@ static partial class BindingSyntaxFactory {
 
 		// generate: CFArray.StringArrayFromHandle (arg1, arg2, arg3)
 		return InvocationExpression (
-			MemberAccessExpression (
-				SyntaxKind.SimpleMemberAccessExpression,
-				IdentifierName ("CFArray"),
-				IdentifierName ("StringArrayFromHandle").WithTrailingTrivia (Space)))
+				MemberAccessExpression (
+					SyntaxKind.SimpleMemberAccessExpression,
+					IdentifierName ("CFArray"),
+					IdentifierName ("StringArrayFromHandle").WithTrailingTrivia (Space)))
 			.WithArgumentList (argumentList);
 	}
 
@@ -171,6 +172,151 @@ static partial class BindingSyntaxFactory {
 					SyntaxKind.SimpleMemberAccessExpression,
 					IdentifierName ("CFString"),
 					IdentifierName ("FromHandle").WithTrailingTrivia (Space)))
+			.WithArgumentList (argumentList);
+	}
+
+	/// <summary>
+	/// Returns the method group needed to get a NSValue from a handle.
+	/// </summary>
+	/// <param name="returnType">The type info of the return type.</param>
+	/// <returns>The member access to the correct NSValue method.</returns>
+	internal static MemberAccessExpressionSyntax? NSValueFromHandle (TypeInfo returnType)
+	{
+#pragma warning disable format
+		var memberName = returnType switch {
+			// CoreAnimation
+			{ FullyQualifiedName: "CoreAnimation.CATransform3D" } => "ToCATransform3D",
+			
+			// CoreGraphics
+			{ FullyQualifiedName: "CoreGraphics.CGAffineTransform" } => "ToCGAffineTransform",
+			{ FullyQualifiedName: "CoreGraphics.CGPoint" } => "ToCGPoint",
+			{ FullyQualifiedName: "CoreGraphics.CGRect" } => "ToCGRect",
+			{ FullyQualifiedName: "CoreGraphics.CGSize" } => "ToCGSize",
+			{ FullyQualifiedName: "CoreGraphics.CGVector" } => "ToCGVector",
+			
+			// CoreMedia
+			{ FullyQualifiedName: "CoreMedia.CMTime" } => "ToCMTime",
+			{ FullyQualifiedName: "CoreMedia.CMTimeMapping" } => "ToCMTimeMapping",
+			{ FullyQualifiedName: "CoreMedia.CMTimeRange" } => "ToCMTimeRange",
+			{ FullyQualifiedName: "CoreMedia.CMVideoDimensions" } => "ToCMVideoDimensions",
+			
+			// CoreLocation
+			{ FullyQualifiedName: "CoreLocation.CLLocationCoordinate2D" } => "ToCLLocationCoordinate2D",
+			
+			// Foundation
+			{ FullyQualifiedName: "Foundation.NSRange" } => "ToNSRange",
+			
+			// MapKit
+			{ FullyQualifiedName: "MapKit.MKCoordinateSpan" } => "ToMKCoordinateSpan",
+			
+			// SceneKit
+			{ FullyQualifiedName: "SceneKit.SCNMatrix4" } => "ToSCNMatrix4",
+			{ FullyQualifiedName: "SceneKit.SCNVector3" } => "ToSCNVector3",
+			{ FullyQualifiedName: "SceneKit.SCNVector4" } => "ToSCNVector4",
+			
+			// UIKit
+			{ FullyQualifiedName: "UIKit.NSDirectionalEdgeInsets" } => "ToNSDirectionalEdgeInsets",
+			{ FullyQualifiedName: "UIKit.UIEdgeInsets" } => "ToUIEdgeInsets",
+			{ FullyQualifiedName: "UIKit.UIOffset" } => "ToUIOffset",
+			
+			_ => null,
+		};
+#pragma warning restore format
+		
+		if (memberName is null)
+			return null;
+		return MemberAccessExpression (
+			SyntaxKind.SimpleMemberAccessExpression,
+			IdentifierName ("NSValue"),
+			IdentifierName (memberName));
+	}
+
+	/// <summary>
+	/// Generates the correct call to the To* methods in the NSValue class that converts a NativeHandle
+	/// to the return type of the method/property.
+	/// </summary>
+	/// <param name="returnType">The return method of the method/property.</param>
+	/// <param name="arguments">The arguments to pass to the NSValue method.</param>
+	/// <returns>The expression needed to call the NSNumber method with the given args.</returns>
+	internal static InvocationExpressionSyntax? NSValueFromHandle (TypeInfo returnType,
+		ImmutableArray<ArgumentSyntax> arguments)
+	{
+		// generate: (arg1, arg2, arg3)
+		var argumentList = ArgumentList (
+			SeparatedList<ArgumentSyntax> (arguments.ToSyntaxNodeOrTokenArray ()));
+
+		// generate: NSNumber.ToInt (arg1, arg2, arg3)
+		var nsValueFromHandle = NSValueFromHandle (returnType);
+		if (nsValueFromHandle is null)
+			return null;
+		return InvocationExpression (
+				nsValueFromHandle.WithTrailingTrivia (Space))
+			.WithArgumentList (argumentList);
+	}
+
+	/// <summary>
+	/// Returns the method group needed to get a NSNumber from a handle.
+	/// </summary>
+	/// <param name="returnType">The type info of the return type.</param>
+	/// <returns>The member access to the correct NSNumber method.</returns>
+	internal static MemberAccessExpressionSyntax? NSNumberFromHandle (TypeInfo returnType)
+	{
+		// create a tuple to store the name and special type depending if it is an array 
+		// or a non array type
+		var info = returnType.IsArray
+			? (Name: returnType.Name, SpecialType: returnType.ArrayElementType)
+			: (Name: returnType.Name, SpecialType: returnType.SpecialType);
+
+#pragma warning disable format
+		var memberName = info switch {
+			// name must be before SpecialType or you'll get them wrong values because
+			// the type we want by name also have a valid special type, the tests should catch
+			// mistakes here
+			{ Name: "NFloat" or "nfloat" } => "ToNFloat",
+			{ Name: "nint" } => "ToNInt",
+			{ Name: "nuint" } => "ToNUInt",
+			{ SpecialType: SpecialType.System_Boolean } => "ToBool",
+			{ SpecialType: SpecialType.System_Byte } => "ToByte",
+			{ SpecialType: SpecialType.System_Double } => "ToDouble",
+			{ SpecialType: SpecialType.System_Single } => "ToFloat",
+			{ SpecialType: SpecialType.System_Int16 } => "ToInt16",
+			{ SpecialType: SpecialType.System_Int32 } => "ToInt32",
+			{ SpecialType: SpecialType.System_Int64 } => "ToInt64",
+			{ SpecialType: SpecialType.System_SByte } => "ToSByte",
+			{ SpecialType: SpecialType.System_UInt16 } => "ToUInt16",
+			{ SpecialType: SpecialType.System_UInt32 } => "ToUInt32",
+			{ SpecialType: SpecialType.System_UInt64 } => "ToUInt64",
+			_ => null,
+		};
+#pragma warning restore format
+		if (memberName is null)
+			return null;
+		return MemberAccessExpression (
+			SyntaxKind.SimpleMemberAccessExpression,
+			IdentifierName ("NSNumber"),
+			IdentifierName (memberName));
+	}
+
+	/// <summary>
+	/// Generates the correct call to the To* methods in the NSNumber class that converts a NativeHandle
+	/// to the return type of the method/property.
+	/// </summary>
+	/// <param name="returnType">The return method of the method/property.</param>
+	/// <param name="arguments">The arguments to pass to the NSNumber method.</param>
+	/// <returns>The expression needed to call the NSNumber method iwth the given args.</returns>
+	internal static InvocationExpressionSyntax? NSNumberFromHandle (TypeInfo returnType,
+		ImmutableArray<ArgumentSyntax> arguments)
+	{
+		// generate: (arg1, arg2, arg3)
+		var argumentList = ArgumentList (
+			SeparatedList<ArgumentSyntax> (arguments.ToSyntaxNodeOrTokenArray ()));
+
+		// generate: NSNumber.ToInt (arg1, arg2, arg3)
+		var nsNumberFromHandle = NSNumberFromHandle (returnType);
+		if (nsNumberFromHandle is null)
+			return null;
+		return InvocationExpression (
+				nsNumberFromHandle.WithTrailingTrivia (Space))
 			.WithArgumentList (argumentList);
 	}
 

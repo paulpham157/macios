@@ -51,9 +51,11 @@ namespace CoreFoundation {
 	public enum CFStreamEventType : ulong {
 		/// <summary>No event occurred.</summary>
 		None = 0,
+		/// <summary>The stream was successfully opened.</summary>
 		OpenCompleted = 1,
 		/// <summary>The stream can now be read.</summary>
 		HasBytesAvailable = 2,
+		/// <summary>The stream now be written to.</summary>
 		CanAcceptBytes = 4,
 		/// <summary>An error occurred on the steeam.</summary>
 		ErrorOccurred = 8,
@@ -154,6 +156,7 @@ namespace CoreFoundation {
 	public enum CFStreamStatus : long {
 		/// <summary>To be added.</summary>
 		NotOpen = 0,
+		/// <summary>To be added.</summary>
 		Opening,
 		/// <summary>To be added.</summary>
 		Open,
@@ -503,6 +506,9 @@ namespace CoreFoundation {
 		[SupportedOSPlatform ("macos")]
 		[SupportedOSPlatform ("tvos")]
 		public class StreamEventArgs : EventArgs {
+			/// <summary>To be added.</summary>
+			///         <value>To be added.</value>
+			///         <remarks>To be added.</remarks>
 			public CFStreamEventType EventType {
 				get;
 				private set;
@@ -693,6 +699,9 @@ namespace CoreFoundation {
 		[DllImport (Constants.CoreFoundationLibrary)]
 		extern static /* dispatch_queue_t */ IntPtr CFWriteStreamCopyDispatchQueue (/* CFWriteStreamRef */ IntPtr stream);
 
+		/// <summary>To be added.</summary>
+		///         <value>To be added.</value>
+		///         <remarks>To be added.</remarks>
 		[SupportedOSPlatform ("ios")]
 		[SupportedOSPlatform ("macos")]
 		[SupportedOSPlatform ("maccatalyst")]
@@ -706,6 +715,9 @@ namespace CoreFoundation {
 			}
 		}
 
+		/// <summary>To be added.</summary>
+		///         <value>To be added.</value>
+		///         <remarks>To be added.</remarks>
 		[SupportedOSPlatform ("ios")]
 		[SupportedOSPlatform ("macos")]
 		[SupportedOSPlatform ("maccatalyst")]
