@@ -176,6 +176,23 @@ static partial class BindingSyntaxFactory {
 	}
 
 	/// <summary>
+	/// Generates the expression to call the CFString.CreateNative method.
+	/// </summary>
+	/// <param name="arguments">The argument list for the invocation.</param>
+	/// <returns>The expression to call the CFString.CreateNative method with the provided args.</returns>
+	internal static InvocationExpressionSyntax StringCreateNative (ImmutableArray<ArgumentSyntax> arguments)
+	{
+		var argumentList = ArgumentList (
+			SeparatedList<ArgumentSyntax> (arguments.ToSyntaxNodeOrTokenArray ()));
+		return InvocationExpression (
+				MemberAccessExpression (
+					SyntaxKind.SimpleMemberAccessExpression,
+					IdentifierName ("CFString"),
+					IdentifierName ("CreateNative").WithTrailingTrivia (Space))
+			).WithArgumentList (argumentList);
+	}
+
+	/// <summary>
 	/// Returns the method group needed to get a NSValue from a handle.
 	/// </summary>
 	/// <param name="returnType">The type info of the return type.</param>
