@@ -437,6 +437,38 @@ public class BindingSyntaxFactoryRuntimeTests {
 		Assert.Equal (expectedDeclaration, declaration.ToFullString ());
 	}
 
+	class TestDataGetHandle : IEnumerable<object []> {
+		public IEnumerator<object []> GetEnumerator ()
+		{
+			yield return [
+				SmartEnumGetValue (
+					ReturnTypeForEnum ("AVFoundation.AVCaptureSystemPressureLevel", isSmartEnum: true),
+					[Argument (IdentifierName ("arg1"))],
+					false),
+				"global::AVFoundation.AVCaptureSystemPressureLevelExtensions.GetValue (arg1).GetHandle ()"
+			];
+
+			yield return [
+				SmartEnumGetValue (
+					ReturnTypeForEnum ("AVFoundation.AVCaptureSystemPressureLevel", isSmartEnum: true),
+					[Argument (IdentifierName ("arg1"))],
+					true),
+				"global::AVFoundation.AVCaptureSystemPressureLevelExtensions.GetNullableValue (arg1).GetHandle ()"
+			];
+		}
+
+		IEnumerator IEnumerable.GetEnumerator () => GetEnumerator ();
+	}
+
+	[Theory]
+	[ClassData (typeof (TestDataGetHandle))]
+	void GetHandleTests (ExpressionSyntax expression, string expectedDeclaration)
+	{
+		var declaration = GetHandle (expression);
+		Assert.Equal (expectedDeclaration, declaration.ToFullString ());
+	}
+
+
 	class TestDataNew : IEnumerable<object []> {
 		public IEnumerator<object []> GetEnumerator ()
 		{
