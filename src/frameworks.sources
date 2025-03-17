@@ -344,6 +344,7 @@ CARPLAY_API_SOURCES = \
 CARPLAY_SOURCES = \
 	CarPlay/CPCompat.cs \
 	CarPlay/CPNavigationAlert.cs \
+	CarPlay/CPNowPlayingSportsClock.cs \
 	CarPlay/CPMessageListItem.cs \
 
 # ClassKit
@@ -2278,6 +2279,7 @@ TVOS_FRAMEWORKS =           \
 	AppTrackingTransparency \
 	AudioToolbox            \
 	AudioUnit               \
+	BackgroundAssets        \
 	BackgroundTasks         \
 	BrowserEngineKit        \
 	CFNetwork               \
