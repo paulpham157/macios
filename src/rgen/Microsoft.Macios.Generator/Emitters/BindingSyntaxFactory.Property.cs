@@ -1,10 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
-using System.Security.Cryptography;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Macios.Generator.DataModel;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -70,8 +67,8 @@ static partial class BindingSyntaxFactory {
 		if (property.UseTempReturn) {
 			// get the getter invocation and assign it to the return variable 
 			return (
-				Send: ExpressionStatement (AssignVariable (property.ReturnType.ReturnVariableName, getterSend)),
-				SendSuper: ExpressionStatement (AssignVariable (property.ReturnType.ReturnVariableName, getterSuperSend))
+				Send: ExpressionStatement (AssignVariable (Nomenclator.GetReturnVariableName (property.ReturnType), getterSend)),
+				SendSuper: ExpressionStatement (AssignVariable (Nomenclator.GetReturnVariableName (property.ReturnType), getterSuperSend))
 			);
 		}
 		// this is the simplest case, we just need to call the method and return the result, for that we
@@ -101,6 +98,10 @@ static partial class BindingSyntaxFactory {
 				// bind from NSValue array: NSArray.ArrayFromHandleFunc<CoreGraphics.CGPoint> (global::ObjCRuntime.Messaging.NativeHandle_objc_msgSend (this.Handle, Selector.GetHandle (\"myProperty\")), NSValue.ToCGPoint, false)
 				{ BindAs.Type.FullyQualifiedName: "Foundation.NSValue", ReturnType.IsArray: true } => 
 					NSArrayFromHandleFunc (property.ReturnType.FullyQualifiedName, [Argument (objMsgSend), Argument(NSValueFromHandle (property.ReturnType)!), BoolArgument (false)]),
+
+				// bind from NSString to a SmartEnum: "global::AVFoundation.AVCaptureSystemPressureLevelExtensions.GetNullableValue (arg1)
+				{ BindAs.Type.FullyQualifiedName: "Foundation.NSString", ReturnType.IsSmartEnum: true} =>
+					SmartEnumGetValue (property.ReturnType, [Argument (objMsgSend)]),
 				
 				// string[]? => CFArray.StringArrayFromHandle (global::ObjCRuntime.Messaging.NativeHandle_objc_msgSend (class_ptr, Selector.GetHandle ("selector")), false);
 				{ ReturnType.IsArray: true, ReturnType.Name: "string", ReturnType.IsNullable: true } =>
