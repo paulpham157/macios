@@ -1770,12 +1770,18 @@ namespace VideoToolbox {
 		[Export ("RequireHardwareAcceleratedVideoDecoder")]
 		bool RequireHardwareAcceleratedVideoDecoder { get; set; }
 
+		/// <summary>To be added.</summary>
+		///         <value>To be added.</value>
+		///         <remarks>To be added.</remarks>
 		[NoiOS]
 		[NoTV]
 		[NoMacCatalyst]
 		[Export ("RequiredDecoderGpuRegistryId")]
 		NSNumber RequiredDecoderGpuRegistryId { get; }
 
+		/// <summary>To be added.</summary>
+		///         <value>To be added.</value>
+		///         <remarks>To be added.</remarks>
 		[NoiOS]
 		[NoTV]
 		[NoMacCatalyst]
@@ -1799,12 +1805,18 @@ namespace VideoToolbox {
 		[Field ("kVTVideoDecoderSpecification_RequireHardwareAcceleratedVideoDecoder")]
 		NSString RequireHardwareAcceleratedVideoDecoder { get; }
 
+		/// <summary>To be added.</summary>
+		///         <value>To be added.</value>
+		///         <remarks>To be added.</remarks>
 		[NoiOS]
 		[NoTV]
 		[NoMacCatalyst]
 		[Field ("kVTVideoDecoderSpecification_RequiredDecoderGPURegistryID")]
 		NSString RequiredDecoderGpuRegistryId { get; }
 
+		/// <summary>To be added.</summary>
+		///         <value>To be added.</value>
+		///         <remarks>To be added.</remarks>
 		[NoiOS]
 		[NoTV]
 		[NoMacCatalyst]
