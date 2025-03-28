@@ -24,18 +24,6 @@ parameters:
     type: string
     default: '$(MaciosUploadPrefix)'
 
-  - name: testConfigurations
-    type: object
-    default: []
-
-  - name: supportedPlatforms
-    type: object
-    default: []
-
-  - name: testsLabels
-    type: string
-    default: ''
-
   - name: statusContext
     type: string
     default: ''
