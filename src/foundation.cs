@@ -13741,9 +13741,6 @@ namespace Foundation {
 		[Export ("isEqualToNumber:")]
 		bool IsEqualTo (IntPtr number);
 
-		[Wrap ("IsEqualTo (number.GetHandle ())")]
-		bool IsEqualTo (NSNumber number);
-
 		[Export ("descriptionWithLocale:")]
 		string DescriptionWithLocale (NSLocale locale);
 
