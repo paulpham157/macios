@@ -49,7 +49,7 @@ static partial class BindingSyntaxFactory {
 		return default;
 	}
 
-	internal static (StatementSyntax Send, StatementSyntax SendSuper) GetGetterInvocations (in Property property,
+	internal static (ExpressionSyntax Send, ExpressionSyntax SendSuper) GetGetterInvocations (in Property property,
 		string? selector, string? sendMethod, string? superSendMethod)
 	{
 		// if any of the methods is null, return a throw statement for both
@@ -66,8 +66,8 @@ static partial class BindingSyntaxFactory {
 
 		// get the getter invocation and assign it to the return variable 
 		return (
-			Send: ExpressionStatement (AssignVariable (Nomenclator.GetReturnVariableName (property.ReturnType), getterSend)),
-			SendSuper: ExpressionStatement (AssignVariable (Nomenclator.GetReturnVariableName (property.ReturnType), getterSuperSend))
+			Send: AssignVariable (Nomenclator.GetReturnVariableName (property.ReturnType), getterSend),
+			SendSuper: AssignVariable (Nomenclator.GetReturnVariableName (property.ReturnType), getterSuperSend)
 		);
 
 #pragma warning disable format
