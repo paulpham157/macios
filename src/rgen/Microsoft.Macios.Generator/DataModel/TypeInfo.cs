@@ -176,6 +176,11 @@ readonly partial struct TypeInfo : IEquatable<TypeInfo> {
 	public DelegateInfo? Delegate { get; init; } = null;
 
 	/// <summary>
+	/// If the type is a pointer type.
+	/// </summary>
+	public bool IsPointer { get; init; }
+
+	/// <summary>
 	/// True if the symbol represents a generic type.
 	/// </summary>
 	public bool IsGenericType { get; init; }
@@ -247,6 +252,7 @@ readonly partial struct TypeInfo : IEquatable<TypeInfo> {
 		IsStruct = symbol.TypeKind == TypeKind.Struct;
 		IsInterface = symbol.TypeKind == TypeKind.Interface;
 		IsDelegate = symbol.TypeKind == TypeKind.Delegate;
+		IsPointer = symbol is IPointerTypeSymbol;
 		IsNativeIntegerType = symbol.IsNativeIntegerType;
 		IsNativeEnum = symbol.HasAttribute (AttributesNames.NativeAttribute);
 		IsProtocol = symbol.HasAttribute (AttributesNames.ProtocolAttribute);
