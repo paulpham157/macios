@@ -9045,8 +9045,6 @@ M:CloudKit.CKSyncEngine.SendChangesAsync
 M:CloudKit.CKSyncEngine.SendChangesAsync(CloudKit.CKSyncEngineSendChangesOptions)
 M:CloudKit.CKSyncEngineConfiguration.Dispose(System.Boolean)
 M:CloudKit.CKSyncEngineDelegate_Extensions.SyncEngine(CloudKit.ICKSyncEngineDelegate,CloudKit.CKSyncEngine,CloudKit.CKSyncEngineFetchChangesContext)
-M:CloudKit.CKSyncEngineFetchChangesScope.#ctor(Foundation.NSSet{CloudKit.CKRecordZoneID},System.Boolean)
-M:CloudKit.CKSyncEngineSendChangesScope.#ctor(Foundation.NSSet{CloudKit.CKRecordZoneID},System.Boolean)
 M:CloudKit.ICKSyncEngineDelegate.SyncEngine(CloudKit.CKSyncEngine,CloudKit.CKSyncEngineEvent)
 M:CloudKit.ICKSyncEngineDelegate.SyncEngine(CloudKit.CKSyncEngine,CloudKit.CKSyncEngineFetchChangesContext)
 M:CloudKit.ICKSyncEngineDelegate.SyncEngine(CloudKit.CKSyncEngine,CloudKit.CKSyncEngineSendChangesContext)
