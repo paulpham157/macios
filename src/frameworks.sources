@@ -1772,7 +1772,6 @@ UIKIT_SOURCES = \
 	UIKit/UIView.cs \
 	UIKit/UIViewController.cs \
 	UIKit/UIViewControllerTransitionCoordinatorContext.cs \
-	UIKit/UIWindow.cs \
 	UIKit/UIWindowScene.cs \
 	UIKit/NSValue.cs \
 
