@@ -1640,7 +1640,6 @@ SPRITEKIT_SOURCES = \
 	SpriteKit/SKKeyframeSequence.cs \
 	SpriteKit/SKNode.cs \
 	SpriteKit/SKShapeNode.cs \
-	SpriteKit/SKVideoNode.cs \
 	SpriteKit/SKWarpGeometryGrid.cs \
 
 # StoreKit
