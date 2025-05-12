@@ -36,7 +36,7 @@ class EnumEmitter : ICodeEmitter {
 			using (var getterBlock = propertyBlock.CreateBlock ("get", true)) {
 				getterBlock.WriteLine ($"fixed (IntPtr *storage = &values [{index}])");
 				getterBlock.WriteLine (
-					$"\treturn Dlfcn.CachePointer (Libraries.{libraryName}.Handle, \"{fieldData.SymbolName}\", storage);");
+					$"\treturn Dlfcn.CachePointer ({Libraries}.{libraryName}.Handle, \"{fieldData.SymbolName}\", storage);");
 			}
 		}
 	}
@@ -106,7 +106,7 @@ class EnumEmitter : ICodeEmitter {
 		// get value from a handle, this is a helper method used in the BindAs bindings.
 		classBlock.WriteDocumentation (Documentation.SmartEnum.GetValueHandle (symbolName));
 		using (var getValueFromHandle =
-			   classBlock.CreateBlock ($"public static {binding.Name} GetValue (NativeHandle handle)",
+			   classBlock.CreateBlock ($"public static {binding.Name} GetValue ({NativeHandle} handle)",
 				   true)) {
 			getValueFromHandle.WriteRaw (
 @"using var str = Runtime.GetNSObject<NSString> (handle)!;
@@ -119,7 +119,7 @@ return GetValue (str);
 		// does have methods that return null for enums)
 		classBlock.WriteDocumentation (Documentation.SmartEnum.GetValueHandle (symbolName));
 		using (var getValueFromHandle =
-			   classBlock.CreateBlock ($"public static {binding.Name}? GetNullableValue (NativeHandle handle)",
+			   classBlock.CreateBlock ($"public static {binding.Name}? GetNullableValue ({NativeHandle} handle)",
 				   true)) {
 			getValueFromHandle.WriteRaw (
 @"using var str = Runtime.GetNSObject<NSString> (handle);
@@ -272,7 +272,7 @@ return GetValue (str);
 $@"public static NSString? GetDomain (this {bindingContext.Changes.Name} self)
 {{
 	if ({backingFieldName} is null)
-		{backingFieldName} = Dlfcn.GetStringConstant (Libraries.{libraryName}.Handle, ""{bindingTypeData.ErrorDomain}"");
+		{backingFieldName} = Dlfcn.GetStringConstant ({Libraries}.{libraryName}.Handle, ""{bindingTypeData.ErrorDomain}"");
 	return {backingFieldName};
 }}
 ");
