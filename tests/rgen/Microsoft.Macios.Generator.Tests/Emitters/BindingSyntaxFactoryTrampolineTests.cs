@@ -1808,6 +1808,25 @@ namespace NS {
 				"unsafe internal delegate void DCallback (global::System.IntPtr block_ptr, int* outNullableInt);"
 			];
 
+			var outInt = @"
+using System;
+using Foundation;
+using ObjCBindings;
+
+namespace NS {
+	public delegate void Callback (out int? outNullableInt);
+	public class MyClass {
+		public void MyMethod (Callback cb) {}
+	}
+}
+";
+
+			yield return [
+				outInt,
+				"DCallback",
+				"unsafe internal delegate void DCallback (global::System.IntPtr block_ptr, int* outNullableInt);"
+			];
+
 			var outBoolean = @"
 using System;
 using Foundation;
@@ -2628,6 +2647,23 @@ namespace NS {
 				"internal static unsafe void Invoke (global::System.IntPtr block_ptr, int* outNullableInt)"
 			];
 
+			var outInt = @"
+using System;
+using Foundation;
+using ObjCBindings;
+namespace NS {
+	public delegate void Callback (out int? outNullableInt);
+	public class MyClass {
+		public void MyMethod (Callback cb) {}
+	}
+}
+";
+
+			yield return [
+				outInt,
+				"internal static unsafe void Invoke (global::System.IntPtr block_ptr, int* outNullableInt)"
+			];
+
 			var outBoolean = @"
 using System;
 using Foundation;
@@ -2961,6 +2997,23 @@ namespace NS {
 
 			yield return [
 				outNullableInt,
+				"delegate* unmanaged<global::System.IntPtr, int*, void> trampoline = &Invoke;",
+			];
+
+			var outInt = @"
+using System;
+using Foundation;
+using ObjCBindings;
+namespace NS {
+	public delegate void Callback (out int outNullableInt);
+	public class MyClass {
+		public void MyMethod (Callback cb) {}
+	}
+}
+";
+
+			yield return [
+				outInt,
 				"delegate* unmanaged<global::System.IntPtr, int*, void> trampoline = &Invoke;",
 			];
 
