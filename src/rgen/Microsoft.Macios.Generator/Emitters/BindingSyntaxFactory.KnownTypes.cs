@@ -75,6 +75,13 @@ static partial class BindingSyntaxFactory {
 		@namespace: ["ObjCRuntime"],
 		@class: "BlockLiteral");
 
+	/// <summary>
+	/// TypeSyntax for ObjCRuntime.BlockLiteral.
+	/// </summary>
+	public static readonly TypeSyntax ThrowHelper = StringExtensions.GetIdentifierName (
+		@namespace: ["ObjCRuntime"],
+		@class: "ThrowHelper");
+
 	// Foundation types
 
 	/// <summary>
