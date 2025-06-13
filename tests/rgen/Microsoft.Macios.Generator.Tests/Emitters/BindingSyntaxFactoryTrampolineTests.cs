@@ -184,7 +184,7 @@ namespace NS {
 
 			yield return [
 				systemStringResult,
-				"NFString.CreateNative (auxVariable, true)"
+				$"{Global ("Foundation.NSString")}.CreateNative (auxVariable, true)"
 			];
 
 			const string nullableSystemStringResult = @"
@@ -201,7 +201,7 @@ namespace NS {
 
 			yield return [
 				nullableSystemStringResult,
-				"NFString.CreateNative (auxVariable, true)"
+				$"{Global ("Foundation.NSString")}.CreateNative (auxVariable, true)"
 			];
 
 			const string boolReturnType = @"
