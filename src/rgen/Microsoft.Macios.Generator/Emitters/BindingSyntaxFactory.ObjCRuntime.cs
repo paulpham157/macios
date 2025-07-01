@@ -13,7 +13,7 @@ using Microsoft.Macios.Generator.DataModel;
 using Microsoft.Macios.Generator.Extensions;
 using Microsoft.Macios.Generator.Formatters;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using static Microsoft.Macios.Generator.Nomenclator; 
+using static Microsoft.Macios.Generator.Nomenclator;
 using TypeInfo = Microsoft.Macios.Generator.DataModel.TypeInfo;
 using Parameter = Microsoft.Macios.Generator.DataModel.Parameter;
 
@@ -211,8 +211,8 @@ static partial class BindingSyntaxFactory {
 		};
 		// syntax that calls the NSArray factory method using the parameter: NSArray.FromNSObjects (targetTensors);
 		var factoryInvocation = MemberInvocationExpression (
-			instanceVariable: NSArray, 
-			methodName: nsArrayFactoryMethod, 
+			instanceVariable: NSArray,
+			methodName: nsArrayFactoryMethod,
 			arguments: [Argument (IdentifierName (parameterName))]);
 
 		// variable name
@@ -241,12 +241,7 @@ static partial class BindingSyntaxFactory {
 		}
 
 		// complicated way to write 'var auxVariableName = '
-		var variableDeclaration = VariableDeclaration (IdentifierName (
-				Identifier (TriviaList (), SyntaxKind.VarKeyword, "var", "var", TriviaList ())))
-			.WithTrailingTrivia (Space)
-			.WithVariables (SingletonSeparatedList (declarator));
-		// add using if requested
-		return LocalDeclarationStatement (variableDeclaration);
+		return VariableInitialization (declarator);
 	}
 
 	/// <summary>
@@ -295,25 +290,11 @@ static partial class BindingSyntaxFactory {
 					SingletonSeparatedList (Argument (NameOf (parameterName)))));
 		}
 
-		// generates: variable = {FactoryCall}
-		var declarator = VariableDeclarator (Identifier (variableName))
-			.WithInitializer (EqualsValueClause (factoryInvocation.WithLeadingTrivia (Space))
-				.WithLeadingTrivia (Space));
 		// generates the final statement: 
 		// var x = zone.GetHandle ();
 		// or 
 		// var x = zone!.GetNonNullHandle (nameof (constantValues));
-		return LocalDeclarationStatement (
-			VariableDeclaration (
-				IdentifierName (
-					Identifier (
-						TriviaList (),
-						SyntaxKind.VarKeyword,
-						"var",
-						"var",
-						TriviaList ()))).WithVariables (
-				SingletonSeparatedList (declarator.WithLeadingTrivia (Space))
-			));
+		return VariableInitialization (variableName: variableName, value: factoryInvocation);
 	}
 
 	/// <summary>
@@ -334,17 +315,16 @@ static partial class BindingSyntaxFactory {
 	internal static LocalDeclarationStatementSyntax? GetHandleDefaultVariable (string variableName)
 	{
 		// generates: var handle = IntPtr.Zero;
-		var declarator = VariableDeclarator (Identifier (variableName))
-			.WithInitializer (EqualsValueClause (
-					MemberAccessExpression (
-						SyntaxKind.SimpleMemberAccessExpression,
-						IntPtr,
-						IdentifierName ("Zero")))
-				.WithLeadingTrivia (Space).WithTrailingTrivia (Space));
+		var memberAccess = MemberAccessExpression (
+				SyntaxKind.SimpleMemberAccessExpression,
+				IntPtr,
+				IdentifierName ("Zero"));
 
-		var variableDeclaration = VariableDeclaration (NativeHandle)
-			.WithVariables (SingletonSeparatedList (declarator));
-		return LocalDeclarationStatement (variableDeclaration).NormalizeWhitespace ();
+		return VariableInitialization (
+			variableName: variableName,
+			value: memberAccess,
+			withType: NativeHandle)
+			.NormalizeWhitespace ();
 	}
 
 	/// <summary>
@@ -371,17 +351,10 @@ static partial class BindingSyntaxFactory {
 		]);
 
 		// generates {var} = CFString.CreateNative ({parameter.Name});
-		var declarator =
-			VariableDeclarator (Identifier (variableName).WithLeadingTrivia (Space).WithTrailingTrivia (Space))
-				.WithInitializer (EqualsValueClause (cfstringFactoryInvocation.WithLeadingTrivia (Space)));
-
-
-		// put everythign together
-		var declaration = VariableDeclaration (IdentifierName (Identifier (
-				TriviaList (), SyntaxKind.VarKeyword, "var", "var", TriviaList ())))
-			.WithVariables (SingletonSeparatedList (declarator));
-
-		return LocalDeclarationStatement (declaration);
+		return VariableInitialization (
+			variableName: variableName,
+			value: cfstringFactoryInvocation
+		);
 	}
 
 	/// <summary>
@@ -461,7 +434,7 @@ static partial class BindingSyntaxFactory {
 		var variableName = GetNameForVariableType (argumentInfo.Name, VariableType.BindFrom);
 		if (variableName is null)
 			return null;
-		
+
 		ImmutableArray<ArgumentSyntax> arguments;
 
 		// the arguments of the factory information depends on if we are dealing with a enum, in which case we cast
@@ -481,20 +454,15 @@ static partial class BindingSyntaxFactory {
 				Argument (IdentifierName (argumentInfo.Name))
 			];
 		}
-		
+
 		// generates: NSNumber.FromDouble
 		var factoryInvocation = MemberInvocationExpression (NSNumber, factoryMethod, arguments);
 
-		var declarator =
-			VariableDeclarator (Identifier (variableName).WithLeadingTrivia (Space).WithTrailingTrivia (Space))
-				.WithInitializer (EqualsValueClause (factoryInvocation.WithLeadingTrivia (Space)));
-
-		// generats: var nba_variable = NSNumber.FromDouble(value);
-		var declaration = VariableDeclaration (IdentifierName (Identifier (
-				TriviaList (), SyntaxKind.VarKeyword, "var", "var", TriviaList ())))
-			.WithVariables (SingletonSeparatedList (declarator));
-
-		return LocalDeclarationStatement (declaration);
+		// generates: var nba_variable = NSNumber.FromDouble(value);
+		return VariableInitialization (
+			variableName: variableName,
+			value: factoryInvocation
+		);
 	}
 
 	internal static LocalDeclarationStatementSyntax? GetNSValueAuxVariable (in ArgumentInfo parameter)
@@ -552,21 +520,16 @@ static partial class BindingSyntaxFactory {
 
 		// generates: NSValue.FromCMTime 
 		var factoryInvocation = MemberInvocationExpression (
-			instanceVariable: NSValue, 
-			methodName: factoryMethod, 
+			instanceVariable: NSValue,
+			methodName: factoryMethod,
 			arguments: [Argument (IdentifierName (parameter.Name))]
 		);
 
-		var declarator =
-			VariableDeclarator (Identifier (variableName).WithLeadingTrivia (Space).WithTrailingTrivia (Space))
-				.WithInitializer (EqualsValueClause (factoryInvocation.WithLeadingTrivia (Space)));
-
-		// generats: var nba_variable = NSNumber.FromDouble(value);
-		var declaration = VariableDeclaration (IdentifierName (Identifier (
-				TriviaList (), SyntaxKind.VarKeyword, "var", "var", TriviaList ())))
-			.WithVariables (SingletonSeparatedList (declarator));
-
-		return LocalDeclarationStatement (declaration);
+		// generates: var nba_variable = NSNumber.FromDouble(value);
+		return VariableInitialization (
+			variableName: variableName,
+			value: factoryInvocation
+		);
 	}
 
 	/// <summary>
@@ -591,16 +554,11 @@ static partial class BindingSyntaxFactory {
 		// method
 		var factoryInvocation = MemberInvocationExpression (parameterName, "GetConstant");
 
-		var declarator =
-			VariableDeclarator (Identifier (variableName).WithLeadingTrivia (Space).WithTrailingTrivia (Space))
-				.WithInitializer (EqualsValueClause (factoryInvocation.WithLeadingTrivia (Space)));
-
-		// generats: var nba_variable = NSNumber.FromDouble(value);
-		var declaration = VariableDeclaration (IdentifierName (Identifier (
-				TriviaList (), SyntaxKind.VarKeyword, "var", "var", TriviaList ())))
-			.WithVariables (SingletonSeparatedList (declarator));
-
-		return LocalDeclarationStatement (declaration);
+		// generates: var nba_variable = NSNumber.FromDouble(value);
+		return VariableInitialization (
+			variableName: variableName,
+			value: factoryInvocation
+		);
 	}
 
 	/// <summary>
@@ -719,15 +677,10 @@ static partial class BindingSyntaxFactory {
 			Argument (IdentifierName (parameter.Name))
 		]);
 
-		var declarator =
-			VariableDeclarator (Identifier (variableName).WithLeadingTrivia (Space).WithTrailingTrivia (Space))
-				.WithInitializer (EqualsValueClause (factoryInvocation.WithLeadingTrivia (Space)));
-
-		var declaration = VariableDeclaration (IdentifierName (Identifier (
-				TriviaList (), SyntaxKind.VarKeyword, "var", "var", TriviaList ())))
-			.WithVariables (SingletonSeparatedList (declarator));
-
-		return LocalDeclarationStatement (declaration);
+		return VariableInitialization (
+			variableName: variableName,
+			value: factoryInvocation
+		);
 	}
 
 	/// <summary>
@@ -759,23 +712,11 @@ static partial class BindingSyntaxFactory {
 	internal static LocalDeclarationStatementSyntax GetAutoreleasePoolVariable ()
 	{
 		const string poolVariableName = "autorelease_pool";
-		//  object creation
-		var create =
-			ObjectCreationExpression (
-					IdentifierName ("NSAutoreleasePool").WithLeadingTrivia (Space).WithTrailingTrivia (Space))
-				.WithArgumentList (ArgumentList ());
-
 		// return the autorelease pool definition 
-		var declarator = VariableDeclarator (Identifier (poolVariableName));
-		declarator = declarator.WithInitializer (EqualsValueClause (create.WithLeadingTrivia (Space))
-				.WithLeadingTrivia (Space));
-
-		var variableDeclaration = VariableDeclaration (IdentifierName (
-				Identifier (TriviaList (), SyntaxKind.VarKeyword, "var", "var", TriviaList ())))
-			.WithTrailingTrivia (Space)
-			.WithVariables (SingletonSeparatedList (declarator));
-
-		return LocalDeclarationStatement (variableDeclaration);
+		return VariableInitialization (
+			variableName: poolVariableName,
+			value: New (NSAutoreleasePool, [])
+		);
 	}
 
 	/// <summary>
@@ -811,20 +752,17 @@ static partial class BindingSyntaxFactory {
 	internal static LocalDeclarationStatementSyntax GetExceptionHandleAuxVariable ()
 	{
 		const string handleVariableName = "exception_gchandle";
-		const string intPtr = "IntPtr";
 		//  object creation
 		var zeroPtr = MemberAccessExpression (
 				SyntaxKind.SimpleMemberAccessExpression,
-				IdentifierName (intPtr),
+				IntPtr,
 				IdentifierName ("Zero"));
 
-		var declarator = VariableDeclarator (Identifier (handleVariableName))
-				.WithInitializer (EqualsValueClause (zeroPtr));
-
-		return LocalDeclarationStatement (
-			VariableDeclaration (IdentifierName (intPtr))
-				.WithVariables (SingletonSeparatedList (declarator)))
-			.NormalizeWhitespace (); // no special mono style
+		return VariableInitialization (
+			handleVariableName,
+			zeroPtr,
+			withType: IntPtr
+		).NormalizeWhitespace ();
 	}
 
 	internal static (string Name, LocalDeclarationStatementSyntax Declaration) GetReturnValueAuxVariable (in TypeInfo returnType)
@@ -864,23 +802,12 @@ static partial class BindingSyntaxFactory {
 				ArgumentList (
 					SingletonSeparatedList (
 						Argument (IdentifierName (variableName)))));
-		// variable declarator 'name = invocation'
-		var declarator = VariableDeclarator (
-				Identifier (GetNameForVariableType (variableName, VariableType.NullableBlock)!).WithTrailingTrivia (Space))
-			.WithInitializer (
-				EqualsValueClause (invocation.WithLeadingTrivia (Space)));
+
 		// var declaration
-		return LocalDeclarationStatement (
-			VariableDeclaration (
-					IdentifierName (
-						Identifier (
-							TriviaList (),
-							SyntaxKind.VarKeyword,
-							"var",
-							"var",
-							TriviaList (Space))))
-				.WithVariables (
-					SingletonSeparatedList (declarator)));
+		return VariableInitialization (
+			variableName: GetNameForVariableType (variableName, VariableType.NullableBlock)!,
+			value: invocation
+		);
 	}
 
 	/// <summary>
@@ -917,12 +844,11 @@ static partial class BindingSyntaxFactory {
 			LiteralExpression (
 				SyntaxKind.NullLiteralExpression));
 
-		return LocalDeclarationStatement (
-			VariableDeclaration (PointerType (BlockLiteral))
-				.WithVariables (
-					SingletonSeparatedList (
-						VariableDeclarator (Identifier (blockLiteralPointerName!))
-							.WithInitializer (EqualsValueClause (conditional))))).NormalizeWhitespace ();
+		return VariableInitialization (
+			variableName: blockLiteralPointerName!,
+			value: conditional.NormalizeWhitespace (),
+			withType: PointerType (BlockLiteral).WithTrailingTrivia (Space)
+		);
 	}
 
 	/// <summary>
@@ -943,14 +869,11 @@ static partial class BindingSyntaxFactory {
 	internal static LocalDeclarationStatementSyntax GetSelectorStringField (string selector, string selectorName)
 	{
 		var fieldName = selectorName.Substring (0, selectorName.Length - 6 /* Handle */);
-		var variableDeclaration =
-			VariableDeclaration (PredefinedType (Token (SyntaxKind.StringKeyword)))
-				.WithVariables (
-					SingletonSeparatedList (
-						VariableDeclarator (Identifier (fieldName))
-							.WithInitializer (EqualsValueClause (
-								LiteralExpression (SyntaxKind.StringLiteralExpression, Literal (selector))))));
-		return LocalDeclarationStatement (variableDeclaration)
+		var variableDeclaration = VariableInitialization (
+			variableName: fieldName,
+			value: LiteralExpression (SyntaxKind.StringLiteralExpression, Literal (selector)),
+			withType: PredefinedType (Token (SyntaxKind.StringKeyword)));
+		return variableDeclaration
 			.WithModifiers (TokenList (Token (SyntaxKind.ConstKeyword))).NormalizeWhitespace ();
 	}
 
@@ -962,19 +885,16 @@ static partial class BindingSyntaxFactory {
 			Token (SyntaxKind.ReadOnlyKeyword).WithTrailingTrivia (Space));
 		// generates: Selector.GetHandle (selector);
 		var getHandleInvocation = MemberInvocationExpression (
-			instanceVariable: Selector, 
-			methodName: "GetHandle", 
+			instanceVariable: Selector,
+			methodName: "GetHandle",
 			arguments: [Argument (LiteralExpression (SyntaxKind.StringLiteralExpression, Literal (selector)))]
 		);
 
 		// generates: NativeHandler selectorName = Selector.GetHandle (selector);
-		return LocalDeclarationStatement (
-			VariableDeclaration (NativeHandle.WithTrailingTrivia (Space))
-				.WithVariables (
-					SingletonSeparatedList (
-						VariableDeclarator (Identifier (selectorName).WithTrailingTrivia (Space))
-							.WithInitializer (EqualsValueClause (getHandleInvocation.WithLeadingTrivia (Space)))))
-		).WithModifiers (modifiers);
+		return VariableInitialization (
+				variableName: selectorName,
+				value: getHandleInvocation,
+				withType: NativeHandle.WithTrailingTrivia ((Space))).WithModifiers (modifiers);
 	}
 
 	static string? GetObjCMessageSendMethodName<T> (ExportData<T> exportData,
